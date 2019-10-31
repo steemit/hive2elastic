@@ -25,8 +25,7 @@ bulk_errors = 0
 
 
 def convert_post(row):
-    return doc_from_row(row, index_name, conf['es_type'])
-
+    return doc_from_row(row, 'hive_posts', 'hive_posts')
 
 def run():
     global conf, es, index_name, bulk_errors

@@ -15,8 +15,6 @@ ARG DOCKER_TAG
 ENV DOCKER_TAG ${DOCKER_TAG}
 
 ENV APP_ROOT /app
-ENV WSGI_APP ${APP_ROOT}/hive/server/serve.py
-ENV HTTP_SERVER_PORT 8080
 
 RUN \
     apt-get update && \
@@ -63,4 +61,6 @@ RUN \
         /var/cache/* \
         /usr/include \
         /usr/local/include
+
+CMD hive2elastic_post
 

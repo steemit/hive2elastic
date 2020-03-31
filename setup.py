@@ -13,6 +13,7 @@ setup(
     long_description=open('README.md').read(),
     packages=find_packages(),
     install_requires=[
+        'certifi',
         'configargparse',
         'elasticsearch',
         'sqlalchemy',

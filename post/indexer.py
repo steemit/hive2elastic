@@ -2,6 +2,7 @@ import logging
 import multiprocessing as mp
 import sys
 import time
+import certifi
 
 import configargparse
 import elasticsearch
@@ -39,7 +40,7 @@ def run():
     except ProgrammingError:
         raise Exception("__h2e_posts table not exists in database")
 
-    es = elasticsearch.Elasticsearch(conf['es_url'])
+    es = elasticsearch.Elasticsearch(conf['es_url'], use_ssl=True, ca_certs=certifi.where())
 
     if not es.ping():
         raise Exception("Elasticsearch server not reachable")
@@ -63,7 +64,7 @@ def run():
                  flag_weight, total_votes, up_votes, title, img_url, payout, promoted,
                  created_at, payout_at, updated_at, is_paidout, is_nsfw, is_declined,
                  is_full_power, is_hidden, is_grayed, rshares, sc_hot, sc_trend, sc_hot,
-                 body, votes,  json FROM hive_posts_cache 
+                 body, votes,  json FROM hive_posts_cache
                  WHERE post_id IN (SELECT post_id FROM __h2e_posts ORDER BY post_id ASC LIMIT :limit)
                 '''
 

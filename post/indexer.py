@@ -26,7 +26,7 @@ parser.add('--db-url', env_var='DB_URL', required=True, help='hive database conn
 parser.add('--es-url', env_var='ES_URL', required=True, help='elasticsearch connection url')
 parser.add('--es-index', env_var='ES_INDEX', help='elasticsearch index name', default='hive_posts')
 parser.add('--es-type', env_var='ES_TYPE', help='elasticsearch type name', default='posts')
-parser.add('--bulk-size', env_var='BULK_SIZE', type=int, help='number of records in a single loop', default=1)
+parser.add('--bulk-size', env_var='BULK_SIZE', type=int, help='number of records in a single loop', default=500)
 parser.add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers', default=2)
 parser.add('--max-bulk-errors', type=int, env_var='MAX_BULK_ERRORS', help='', default=5)
 

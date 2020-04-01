@@ -19,14 +19,28 @@ logger = logging.getLogger('hive2elastic')
 # disable elastic search's confusing logging
 logging.getLogger('elasticsearch').setLevel(logging.CRITICAL)
 
-conf = {}
-index_name = None
+
+parser = configargparse.get_arg_parser()
+
+parser.add('--db-url', env_var='DB_URL', required=True, help='hive database connection url')
+parser.add('--es-url', env_var='ES_URL', required=True, help='elasticsearch connection url')
+parser.add('--es-index', env_var='ES_INDEX', help='elasticsearch index name', default='hive_posts')
+parser.add('--es-type', env_var='ES_TYPE', help='elasticsearch type name', default='posts')
+parser.add('--bulk-size', env_var='BULK_SIZE', type=int, help='number of records in a single loop', default=1)
+parser.add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers', default=2)
+parser.add('--max-bulk-errors', type=int, env_var='MAX_BULK_ERRORS', help='', default=5)
+
+args = parser.parse_args()
+
+global conf
+
+conf = vars(args)
+
 es = None
 bulk_errors = 0
 
-
 def convert_post(row):
-    return doc_from_row(row, index_name, conf['es_type'])
+    return doc_from_row(row, conf['es_index'], conf['es_type'])
 
 
 def run():
@@ -105,24 +119,8 @@ def run():
 
 
 def main():
-    parser = configargparse.get_arg_parser()
-
-    parser.add('--db-url', env_var='DB_URL', required=True, help='hive database connection url')
-    parser.add('--es-url', env_var='ES_URL', required=True, help='elasticsearch connection url')
-    parser.add('--es-index', env_var='ES_INDEX', help='elasticsearch index name', default='hive_posts')
-    parser.add('--es-type', env_var='ES_TYPE', help='elasticsearch type name', default='posts')
-    parser.add('--bulk-size', env_var='BULK_SIZE', type=int, help='number of records in a single loop', default=500)
-    parser.add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers', default=2)
-    parser.add('--max-bulk-errors', type=int, env_var='MAX_BULK_ERRORS', help='', default=5)
-
-    args = parser.parse_args()
-
-    global conf
-
-    conf = vars(args)
 
     run()
-
 
 if __name__ == "__main__":
     main()

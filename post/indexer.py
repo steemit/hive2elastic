@@ -2,6 +2,7 @@ import logging
 import multiprocessing as mp
 import sys
 import time
+import certifi
 
 import configargparse
 import elasticsearch
@@ -18,14 +19,28 @@ logger = logging.getLogger('hive2elastic')
 # disable elastic search's confusing logging
 logging.getLogger('elasticsearch').setLevel(logging.CRITICAL)
 
-conf = {}
-index_name = None
+
+parser = configargparse.get_arg_parser()
+
+parser.add('--db-url', env_var='DB_URL', required=True, help='hive database connection url')
+parser.add('--es-url', env_var='ES_URL', required=True, help='elasticsearch connection url')
+parser.add('--es-index', env_var='ES_INDEX', help='elasticsearch index name', default='hive_posts')
+parser.add('--es-type', env_var='ES_TYPE', help='elasticsearch type name', default='posts')
+parser.add('--bulk-size', env_var='BULK_SIZE', type=int, help='number of records in a single loop', default=500)
+parser.add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers', default=2)
+parser.add('--max-bulk-errors', type=int, env_var='MAX_BULK_ERRORS', help='', default=5)
+
+args = parser.parse_args()
+
+global conf
+
+conf = vars(args)
+
 es = None
 bulk_errors = 0
 
-
 def convert_post(row):
-    return doc_from_row(row, index_name, conf['es_type'])
+    return doc_from_row(row, conf['es_index'], conf['es_type'])
 
 
 def run():
@@ -39,7 +54,7 @@ def run():
     except ProgrammingError:
         raise Exception("__h2e_posts table not exists in database")
 
-    es = elasticsearch.Elasticsearch(conf['es_url'])
+    es = elasticsearch.Elasticsearch(conf['es_url'], use_ssl=True, ca_certs=certifi.where())
 
     if not es.ping():
         raise Exception("Elasticsearch server not reachable")
@@ -63,7 +78,7 @@ def run():
                  flag_weight, total_votes, up_votes, title, img_url, payout, promoted,
                  created_at, payout_at, updated_at, is_paidout, is_nsfw, is_declined,
                  is_full_power, is_hidden, is_grayed, rshares, sc_hot, sc_trend, sc_hot,
-                 body, votes,  json FROM hive_posts_cache 
+                 body, votes,  json FROM hive_posts_cache
                  WHERE post_id IN (SELECT post_id FROM __h2e_posts ORDER BY post_id ASC LIMIT :limit)
                 '''
 
@@ -104,24 +119,8 @@ def run():
 
 
 def main():
-    parser = configargparse.get_arg_parser()
-
-    parser.add('--db-url', env_var='DB_URL', required=True, help='hive database connection url')
-    parser.add('--es-url', env_var='ES_URL', required=True, help='elasticsearch connection url')
-    parser.add('--es-index', env_var='ES_INDEX', help='elasticsearch index name', default='hive_posts')
-    parser.add('--es-type', env_var='ES_TYPE', help='elasticsearch type name', default='posts')
-    parser.add('--bulk-size', env_var='BULK_SIZE', type=int, help='number of records in a single loop', default=500)
-    parser.add('--max-workers', type=int, env_var='MAX_WORKERS', help='max workers', default=2)
-    parser.add('--max-bulk-errors', type=int, env_var='MAX_BULK_ERRORS', help='', default=5)
-
-    args = parser.parse_args()
-
-    global conf
-
-    conf = vars(args)
 
     run()
-
 
 if __name__ == "__main__":
     main()

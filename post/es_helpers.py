@@ -11,7 +11,7 @@ def make_index_config(type_name):
                 'analyzer': {
                     'index_analyzer': {
                         'tokenizer': 'whitespace',
-                        'filter': ['standard', 'lowercase', 'asciifolding', 'my_word_delimiter']
+                        'filter': ['lowercase', 'asciifolding', 'my_word_delimiter']
                     }
                 },
                 'filter': {
@@ -253,7 +253,6 @@ def doc_from_row(row, index_name, index_type):
 
     return {
         '_index': index_name,
-        '_type': index_type,
         '_id': row.post_id,
         'post_id': row.post_id,
         'author': row.author,

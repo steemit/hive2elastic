@@ -26,7 +26,6 @@ def make_index_config(type_name):
             }
         },
         'mappings': {
-            '_doc': {
                 'properties': {
                     'post_id': {
                         'type': 'integer'
@@ -133,7 +132,6 @@ def make_index_config(type_name):
                         'type': 'text',
                         'analyzer': 'index_analyzer'
                     }
-                }
             }
         }
     }

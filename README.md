@@ -2,6 +2,7 @@
 
 hive2elastic synchronises [hive](https://github.com/steemit/hivemind)'s hive_posts_cache table to a elasticsearch index and keeps it updated.
 
+Requires Elastic Search v.6.
 
 ## Before start
 
@@ -84,4 +85,14 @@ $ export BULK_SIZE=2000
 $ export MAX_WORKERS=4
 
 $ hive2elastic_post
+```
+
+## Docker
+```
+docker build -t steemit/hive2elastic .
+```
+
+
+```
+docker run -it --env DB_URL=your_hivemind_db_url ES_URL=your_elastic_search_url steemit/hive2elastic
 ```

@@ -73,10 +73,10 @@ def run():
     while True:
         start = time.time()
 
-        sql = '''SELECT id as account_id, `name`, display_name, profile_image, 
+        sql = '''SELECT id as account_id, name, display_name, profile_image, 
                  followers, following, post_count, rank, created_at
                  FROM hive_accounts
-                 WHERE id IN (SELECT post_id FROM __h2e_accounts ORDER BY account_id ASC LIMIT :limit)
+                 WHERE id IN (SELECT account_id FROM __h2e_accounts ORDER BY account_id ASC LIMIT :limit)
                 '''
 
         accounts = db_engine.execute(text(sql), limit=conf['bulk_size']).fetchall()

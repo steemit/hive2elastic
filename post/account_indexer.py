@@ -47,7 +47,7 @@ def run():
 
     try:
         db_engine = create_engine(conf['db_url'])
-        db_engine.execute("SELECT post_id FROM __h2e_accounts LIMIT 1")
+        db_engine.execute("SELECT account_id FROM __h2e_accounts LIMIT 1")
     except OperationalError:
         raise Exception("Could not connected: {}".format(conf['db_url']))
     except ProgrammingError:

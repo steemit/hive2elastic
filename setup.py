@@ -23,6 +23,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'hive2elastic_post=post.indexer:main'
+            'hive2elastic_post=post.posts_indexer:main',
+            'hive2elastic_account=post.account_indexer:main'
         ]
     })

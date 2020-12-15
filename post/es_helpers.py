@@ -137,6 +137,49 @@ def make_index_config(type_name):
     }
 
 
+def make_account_index_config(type_name):
+    return {
+        'mappings': {
+            'properties': {
+                'account_id': {
+                    'type': 'integer'
+                },
+                'name': {
+                    'type': 'text',
+                    'analyzer': 'standard'
+                },
+                'display_name': {
+                    'type': 'text',
+                    'index': 'false'
+                },
+                'profile_image': {
+                    'type': 'text',
+                    'index': 'false'
+                },
+                'followers': {
+                    'type': 'integer',
+                    'index': 'false'
+                },
+                'following': {
+                    'type': 'integer',
+                    'index': 'false'
+                },
+                'post_count': {
+                    'type': 'integer',
+                    'index': 'false'
+                },
+                'rank': {
+                    'type': 'integer',
+                    'index': 'false'
+                },
+                'created_at': {
+                    'type': 'date'
+                }
+            }
+        }
+    }
+
+
 @timeout_decorator.timeout(5)
 def sanitize_post_body(body):
     """
@@ -284,4 +327,20 @@ def doc_from_row(row, index_name, index_type):
         'tags': tags,
         'app': app,
         'searchable': '{} | {}'.format(row.title, sanitized_body)
+    }
+
+
+def doc_from_row_account(row, index_name, index_type):
+    return {
+        '_index': index_name,
+        '_id': row.account_id,
+        'account_id': row.account_id,
+        'name': row.name,
+        'display_name': row.display_name,
+        'profile_image': row.profile_image,
+        'followers': row.followers,
+        'following': row.following,
+        'post_count': row.post_count,
+        'rank': row.rank,
+        'created_at': row.created_at
     }

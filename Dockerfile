@@ -63,4 +63,5 @@ RUN \
         /usr/local/include
 
 CMD hive2elastic_post
+CMD hive2elastic_account
 

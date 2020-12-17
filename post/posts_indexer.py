@@ -13,7 +13,6 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from .es_helpers import make_index_config, doc_from_row
 from .util import chunks
 
-import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('hive2elastic')

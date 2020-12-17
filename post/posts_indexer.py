@@ -77,7 +77,7 @@ def es_sync(db_engine, rows, post_type):
     chunked_id_list = list(chunks(post_ids, 200))
 
     for chunk in chunked_id_list:
-        sql = "DELETE FROM __h2e_posts WHERE post_id IN :ids"
+        sql = "DELETE FROM __h2e_posts_new WHERE post_id IN :ids"
         db_engine.execute(text(sql), ids=tuple(chunk))
 
 def run():
@@ -85,7 +85,7 @@ def run():
 
     try:
         db_engine = create_engine(conf['db_url'])
-        db_engine.execute("SELECT post_id FROM __h2e_posts LIMIT 1")
+        db_engine.execute("SELECT post_id FROM __h2e_posts_new LIMIT 1")
     except OperationalError:
         raise Exception("Could not connected: {}".format(conf['db_url']))
     except ProgrammingError:
@@ -126,7 +126,7 @@ def run():
                  created_at, payout_at, updated_at, is_paidout, is_nsfw, is_declined,
                  is_full_power, is_hidden, is_grayed, rshares, sc_hot, sc_trend, sc_hot,
                  body, votes,  json FROM hive_posts_cache
-                 WHERE post_id IN (SELECT post_id FROM __h2e_posts ORDER BY post_id ASC LIMIT :limit)
+                 WHERE post_id IN (SELECT post_id FROM __h2e_posts_new ORDER BY post_id ASC LIMIT :limit)
                 '''
 
         posts = db_engine.execute(text(sql), limit=conf['bulk_size']).fetchall()

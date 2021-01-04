@@ -2,8 +2,8 @@ import logging
 import multiprocessing as mp
 import sys
 import time
-import certifi
 
+import certifi
 import configargparse
 import elasticsearch
 from elasticsearch import helpers
@@ -14,7 +14,7 @@ from .es_helpers import make_account_index_config, doc_from_row_account
 from .util import chunks
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('hive2elastic')
+logger = logging.getLogger('hive2elastic_account')
 
 # disable elastic search's confusing logging
 logging.getLogger('elasticsearch').setLevel(logging.CRITICAL)
@@ -31,19 +31,18 @@ parser.add('--max-bulk-errors', type=int, env_var='MAX_BULK_ERRORS', help='', de
 
 args = parser.parse_args()
 
-global conf
-
 conf = vars(args)
 
 es = None
 bulk_errors = 0
+
 
 def convert_account(row):
     return doc_from_row_account(row, conf['es_index'], conf['es_type'])
 
 
 def run():
-    global conf, es, index_name, bulk_errors
+    global conf, es, bulk_errors
 
     try:
         db_engine = create_engine(conf['db_url'])
@@ -51,7 +50,7 @@ def run():
     except OperationalError:
         raise Exception("Could not connected: {}".format(conf['db_url']))
     except ProgrammingError:
-        raise Exception("__h2e_posts table not exists in database")
+        raise Exception("__h2e_accounts table not exists in database")
 
     es = elasticsearch.Elasticsearch(conf['es_url'], use_ssl=True, ca_certs=certifi.where())
 
@@ -68,13 +67,13 @@ def run():
         index_config = make_account_index_config(index_type)
         es.indices.create(index=index_name, body=index_config)
 
-    logger.info('Starting indexing')
+    logger.info('Account starting indexing')
 
     while True:
         start = time.time()
 
         sql = '''SELECT id as account_id, name, display_name, profile_image, 
-                 followers, following, post_count, rank, created_at
+                 followers, following, post_count, reputation, rank, created_at
                  FROM hive_accounts
                  WHERE id IN (SELECT account_id FROM __h2e_accounts ORDER BY account_id ASC LIMIT :limit)
                 '''
@@ -112,12 +111,12 @@ def run():
             db_engine.execute(text(sql), ids=tuple(chunk))
 
         end = time.time()
-        logger.info('{} indexed in {}'.format(len(accounts), (end - start)))
+        logger.info('{} accounts indexed in {}'.format(len(accounts), (end - start)))
 
 
 def main():
-
     run()
+
 
 if __name__ == "__main__":
     main()

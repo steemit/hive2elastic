@@ -164,6 +164,10 @@ def make_account_index_config(type_name):
                     'type': 'integer',
                     'index': 'false'
                 },
+                'reputation': {
+                    'type': 'integer',
+                    'index': 'false'
+                },
                 'post_count': {
                     'type': 'integer',
                     'index': 'false'
@@ -341,6 +345,7 @@ def doc_from_row_account(row, index_name, index_type):
         'followers': row.followers,
         'following': row.following,
         'post_count': row.post_count,
+        'reputation': row.reputation,
         'rank': row.rank,
         'created_at': row.created_at
     }

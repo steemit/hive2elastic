@@ -2,8 +2,8 @@ import logging
 import multiprocessing as mp
 import sys
 import time
-import certifi
 
+import certifi
 import configargparse
 import elasticsearch
 from elasticsearch import helpers
@@ -13,13 +13,11 @@ from sqlalchemy.exc import OperationalError, ProgrammingError
 from .es_helpers import make_index_config, doc_from_row
 from .util import chunks
 
-
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('hive2elastic')
+logger = logging.getLogger('hive2elastic_post')
 
 # disable elastic search's confusing logging
 logging.getLogger('elasticsearch').setLevel(logging.CRITICAL)
-
 
 parser = configargparse.get_arg_parser()
 
@@ -35,18 +33,20 @@ parser.add('--max-bulk-errors', type=int, env_var='MAX_BULK_ERRORS', help='', de
 
 args = parser.parse_args()
 
-global conf
-
 conf = vars(args)
 
-es = None
+es = elasticsearch.Elasticsearch(conf['es_url'], use_ssl=True, ca_certs=certifi.where())
+
 bulk_errors = 0
+
 
 def convert_post(row):
     return doc_from_row(row, conf['es_index'], conf['es_type'])
 
+
 def convert_reply(row):
     return doc_from_row(row, conf['es_index_reply'], conf['es_type_reply'])
+
 
 def es_sync(db_engine, rows, post_type):
     global bulk_errors, es, conf
@@ -76,21 +76,20 @@ def es_sync(db_engine, rows, post_type):
     chunked_id_list = list(chunks(post_ids, 200))
 
     for chunk in chunked_id_list:
-        sql = "DELETE FROM __h2e_posts_new WHERE post_id IN :ids"
+        sql = "DELETE FROM __h2e_posts WHERE post_id IN :ids"
         db_engine.execute(text(sql), ids=tuple(chunk))
 
+
 def run():
-    global conf, es, index_name, bulk_errors
+    global conf, es, bulk_errors
 
     try:
         db_engine = create_engine(conf['db_url'])
-        db_engine.execute("SELECT post_id FROM __h2e_posts_new LIMIT 1")
+        db_engine.execute("SELECT post_id FROM __h2e_posts LIMIT 1")
     except OperationalError:
         raise Exception("Could not connected: {}".format(conf['db_url']))
     except ProgrammingError:
         raise Exception("__h2e_posts table not exists in database")
-
-    es = elasticsearch.Elasticsearch(conf['es_url'], use_ssl=True, ca_certs=certifi.where())
 
     if not es.ping():
         raise Exception("Elasticsearch server not reachable")
@@ -115,7 +114,7 @@ def run():
         index_config = make_index_config(reply_index_type)
         es.indices.create(index=reply_index_name, body=index_config)
 
-    logger.info('Starting indexing')
+    logger.info('Post starting indexing')
 
     while True:
         start = time.time()
@@ -125,7 +124,7 @@ def run():
                  created_at, payout_at, updated_at, is_paidout, is_nsfw, is_declined,
                  is_full_power, is_hidden, is_grayed, rshares, sc_hot, sc_trend, sc_hot,
                  body, votes,  json FROM hive_posts_cache
-                 WHERE post_id IN (SELECT post_id FROM __h2e_posts_new ORDER BY post_id ASC LIMIT :limit)
+                 WHERE post_id IN (SELECT post_id FROM __h2e_posts ORDER BY post_id ASC LIMIT :limit)
                 '''
 
         posts = db_engine.execute(text(sql), limit=conf['bulk_size']).fetchall()
@@ -147,12 +146,12 @@ def run():
         es_sync(db_engine, replies, 2)
 
         end = time.time()
-        logger.info('{} indexed in {}'.format(len(posts), (end - start)))
+        logger.info('{} posts indexed in {}'.format(len(posts), (end - start)))
 
 
 def main():
-
     run()
+
 
 if __name__ == "__main__":
     main()

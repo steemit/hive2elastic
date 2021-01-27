@@ -60,7 +60,8 @@ RUN \
         /var/tmp/* \
         /var/cache/* \
         /usr/include \
-        /usr/local/include
+        /usr/local/include && \
+    chmod +x /app/start.sh
 
-CMD hive2elastic_post
+CMD /app/start.sh
 

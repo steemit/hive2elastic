@@ -15,7 +15,7 @@ setup(
     install_requires=[
         'certifi',
         'configargparse',
-        'elasticsearch',
+        'elasticsearch==5.5.3',
         'sqlalchemy',
         'psycopg2-binary',
         'markdown2',

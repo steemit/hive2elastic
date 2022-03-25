@@ -7,7 +7,7 @@ if [[ $c1 -lt 1 ]]; then
   echo Status: 500
   echo Content-type:text/plain
   echo
-  echo hive2elastic_post_not_healthy
+  echo hive2elastic_post not healthy
   exit 1
 fi
 
@@ -15,12 +15,12 @@ if [[ $c2 -lt 1 ]]; then
   echo Status: 500
   echo Content-type:text/plain
   echo
-  echo hive2elastic_account_not_healthy
+  echo hive2elastic_account not healthy
   exit 1
 fi
 
 echo Status: 200
 echo Content-type:text/plain
 echo
-echo healthcheck
+echo healthcheck ok
 exit 0

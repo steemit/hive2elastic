@@ -21,7 +21,7 @@ WORKDIR /app
 RUN \
     pip3 install . && \
     mkdir -p /run/nginx/ && \
-    cp /app/nginx.conf /etc/nginx/default.conf && \
+    cp /app/nginx.conf /etc/nginx/conf.d/default.conf && \
     chmod +x /app/healthcheck.sh && \
     chmod +x /app/start.sh
 

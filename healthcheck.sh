@@ -1,6 +1,5 @@
 #!/bin/ash
 
-
 c1=`ps aux | grep hive2elastic_post | grep -v grep | wc -l`
 c2=`ps aux | grep hive2elastic_account | grep -v grep | wc -l`
 

@@ -52,7 +52,7 @@ def run():
     except ProgrammingError:
         raise Exception("__h2e_accounts table not exists in database")
 
-    es = elasticsearch.Elasticsearch(conf['es_url'], use_ssl=True, ca_certs=certifi.where())
+    es = elasticsearch.Elasticsearch(conf['es_url'])
 
     if not es.ping():
         raise Exception("Elasticsearch server not reachable")

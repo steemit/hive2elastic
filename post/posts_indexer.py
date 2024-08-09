@@ -35,7 +35,7 @@ args = parser.parse_args()
 
 conf = vars(args)
 
-es = elasticsearch.Elasticsearch(conf['es_url'], use_ssl=True, ca_certs=certifi.where())
+es = elasticsearch.Elasticsearch(conf['es_url'])
 
 bulk_errors = 0
 
